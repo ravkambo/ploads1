@@ -271,7 +271,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <p className="text-sm text-white/60 uppercase tracking-widest font-bold">Email Us</p>
-                  <p className="text-xl font-bold">dispatch@protectedloads.com</p>
+                  <p className="text-xl font-bold">load@ploads.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-6">
@@ -280,7 +280,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <p className="text-sm text-white/60 uppercase tracking-widest font-bold">Headquarters</p>
-                  <p className="text-xl font-bold">Chicago, IL</p>
+                  <p className="text-xl font-bold">Toronto, ON</p>
                 </div>
               </div>
             </div>
@@ -359,7 +359,7 @@ const Footer = () => {
         </div>
         <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-            © 2026 Protected Loads Inc. All rights reserved.
+            © 2024 Protected Loads Inc. All rights reserved.
           </p>
           <div className="flex gap-6">
             <div className="w-5 h-5 bg-slate-200 rounded-full" />
