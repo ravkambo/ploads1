@@ -359,7 +359,7 @@ const Footer = () => {
         </div>
         <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-            © 2024 Protected Loads Inc. All rights reserved.
+            © 2026 Protected Loads Inc. All rights reserved.
           </p>
           <div className="flex gap-6">
             <div className="w-5 h-5 bg-slate-200 rounded-full" />
