@@ -135,7 +135,7 @@ const Hero = ({ onOpenQuote }: { onOpenQuote: () => void }) => {
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Reefer Services</p>
-                <p className="text-xl font-bold text-brand-blue">Available on Demand</p>
+                <p className="text-xl font-bold text-brand-blue">Multiple Temp on Demand</p>
               </div>
             </div>
           </div>
@@ -193,7 +193,7 @@ const Services = () => {
             description="Precision temperature-controlled logistics for sensitive cargo. From pharmaceuticals to fresh produce, we maintain the cold chain without exception."
             features={[
               "Remote temperature monitoring",
-              "Multi-temp capabilities",
+              "Multi-temp on demand",
               "Pre-cooling protocols",
               "24/7 reefer unit support"
             ]}
