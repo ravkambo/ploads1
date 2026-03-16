@@ -315,7 +315,7 @@ const Careers = () => {
               <p className="text-white/70">Send us your resume anyway! We're always looking for great talent.</p>
             </div>
             <a 
-              href="mailto:loads@ploads.ca" 
+              href="mailto:load@ploads.ca" 
               className="bg-white text-brand-blue px-8 py-4 rounded-xl font-bold hover:bg-slate-100 transition-all shadow-lg whitespace-nowrap"
             >
               Apply Now
@@ -348,7 +348,7 @@ const Contact = () => {
             { icon: Phone, label: "Call Us", value: "416-521-3131" },
             { icon: Headset, label: "Toll Free", value: "844-350-1947" },
             { icon: Printer, label: "Fax", value: "416-521-3138" },
-            { icon: Mail, label: "Email Us", value: "loads@ploads.ca" },
+            { icon: Mail, label: "Email Us", value: "load@ploads.ca" },
             { icon: MapPin, label: "Headquarters", value: "Toronto, ON" },
             { icon: Clock, label: "Availability", value: "24/7 Dispatch" }
           ].map((item, i) => (
@@ -649,7 +649,7 @@ const QuoteModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
                 </div>
                 <div>
                   <h4 className="font-bold">Quote Submitted</h4>
-                  <p className="text-sm opacity-80 text-green-700">Your quote has been successfully sent to loads@ploads.ca.</p>
+                  <p className="text-sm opacity-80 text-green-700">Your quote has been successfully sent to load@ploads.ca.</p>
                 </div>
               </div>
 
@@ -805,7 +805,7 @@ const PrivacyPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () 
             <p>
               For privacy-related inquiries, please contact:<br />
               <strong>Compliance Department</strong><br />
-              Email: <a href="mailto:loads@loads.ca" className="text-brand-blue hover:text-brand-red font-semibold">loads@loads.ca</a>
+              Email: <a href="mailto:load@ploads.ca" className="text-brand-blue hover:text-brand-red font-semibold">load@ploads.ca</a>
             </p>
           </div>
         </div>
