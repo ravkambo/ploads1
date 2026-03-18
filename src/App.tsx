@@ -68,6 +68,7 @@ const Navbar = ({ onOpenQuote }: { onOpenQuote: () => void }) => {
         >
           <a href="#services" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Services</a>
           <a href="#about" className="text-lg font-medium" onClick={() => setIsOpen(false)}>About</a>
+          <a href="#careers" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Careers</a>
           <a href="#contact" className="text-lg font-medium" onClick={() => setIsOpen(false)}>Contact</a>
           <button 
             onClick={() => {
@@ -261,12 +262,11 @@ const About = () => {
   );
 };
 
-const Careers = () => {
+const Careers = ({ onApplyDispatcher, onApplyDriver }: { onApplyDispatcher: () => void; onApplyDriver: () => void }) => {
   const jobs = [
-    { title: "Long Haul Driver (AZ)", type: "Full-Time", icon: Truck, urgent: true },
-    { title: "Owner Operators (AZ)", type: "Contract", icon: Users, urgent: true },
-    { title: "Dispatcher", type: "Full-Time", icon: Headset },
-    
+    { title: "Long Haul Driver (AZ)", type: "Full-Time", icon: Truck, urgent: true, onApply: onApplyDriver },
+    { title: "Owner Operators (AZ)", type: "Contract", icon: Users, urgent: true, onApply: onApplyDriver },
+    { title: "Dispatcher", type: "Full-Time", icon: Headset, onApply: onApplyDispatcher },
   ];
 
   return (
@@ -282,9 +282,10 @@ const Careers = () => {
 
         <div className="grid md:grid-cols-2 gap-6">
           {jobs.map((job, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               whileHover={{ x: 10 }}
+              onClick={job.onApply}
               className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group cursor-pointer"
             >
               <div className="flex items-center gap-4">
@@ -295,7 +296,7 @@ const Careers = () => {
                   <div className="flex items-center gap-2">
                     <h4 className="font-bold text-brand-blue">{job.title}</h4>
                     {job.urgent && (
-                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-red/10 text-brand-red text-xs font-bold uppercase tracking-wider mb-6">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-red/10 text-brand-red text-xs font-bold uppercase tracking-wider">
                         Urgent
                       </span>
                     )}
@@ -369,7 +370,7 @@ const Contact = () => {
 const QuoteModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<File[]>([]);
-  const [assessment, setAssessment] = useState<{ risk: string, margin: string, actions: string[] } | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     shipment_type: 'Dry Van',
@@ -398,24 +399,19 @@ const QuoteModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      const response = await fetch('http://localhost:3001/api/quote', {
+      const data = new FormData();
+      Object.entries(formData).forEach(([key, value]) => data.append(key, value as string));
+      files.forEach(file => data.append('files', file));
+
+      const response = await fetch('/api/quote', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: data
       });
 
       if (response.ok) {
-        setAssessment({
-          risk: "Low",
-          margin: "18%",
-          actions: [
-            "Pre-cool trailer to requested temperature",
-            "Verify high-value cargo seals",
-            "Log GPS tracking checkpoints every 4 hours"
-          ]
-        });
+        setSubmitted(true);
         setStep(3);
       } else {
         alert('Failed to submit quote. Please try again.');
@@ -555,8 +551,14 @@ const QuoteModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
                 )}
               </div>
 
-              <button 
-                onClick={() => setStep(2)}
+              <button
+                onClick={() => {
+                  if (!formData.pickup_location.trim() || !formData.delivery_location.trim()) {
+                    alert('Please enter both a pickup and delivery location.');
+                    return;
+                  }
+                  setStep(2);
+                }}
                 className="w-full bg-brand-blue text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-lg"
               >
                 Next Step
@@ -637,7 +639,7 @@ const QuoteModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
             </form>
           )}
 
-          {step === 3 && assessment && (
+          {step === 3 && submitted && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -654,6 +656,220 @@ const QuoteModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void 
               </div>
 
               <button 
+                onClick={onClose}
+                className="w-full bg-brand-blue text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all"
+              >
+                Done
+              </button>
+            </motion.div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+const CallUsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-brand-blue/40 backdrop-blur-md"
+      />
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="bg-white w-full max-w-sm rounded-3xl shadow-2xl relative z-10 p-8 text-center"
+      >
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-slate-50 rounded-full transition-colors">
+          <X className="w-5 h-5 text-slate-400" />
+        </button>
+        <div className="w-16 h-16 bg-brand-blue/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <Phone className="text-brand-blue w-8 h-8" />
+        </div>
+        <h3 className="text-xl font-bold text-brand-blue mb-2">Give Us a Call</h3>
+        <p className="text-slate-500 mb-6">Call us at the number below to discuss this opportunity.</p>
+        <a
+          href="tel:4165213131"
+          className="block bg-brand-blue text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-800 transition-all shadow-lg"
+        >
+          416-521-3131
+        </a>
+      </motion.div>
+    </div>
+  );
+};
+
+const DispatcherApplyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [resume, setResume] = useState<File | null>(null);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', experience: '' });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resume) {
+      alert('Please upload your resume.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = new FormData();
+      Object.entries(formData).forEach(([key, value]) => data.append(key, value as string));
+      data.append('resume', resume);
+      const response = await fetch('/api/apply', { method: 'POST', body: data });
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        alert('Failed to submit application. Please try again.');
+      }
+    } catch (error) {
+      console.error('Application Error:', error);
+      alert('Error connecting to the server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-brand-blue/40 backdrop-blur-md"
+      />
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden max-h-[90vh] flex flex-col"
+      >
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-20">
+          <div>
+            <h2 className="text-2xl font-bold text-brand-blue">Apply — Dispatcher</h2>
+            <p className="text-sm text-slate-500">Full-Time · Toronto, ON</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors">
+            <X className="w-6 h-6 text-slate-400" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-8">
+          {!submitted ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Full Name</label>
+                  <input
+                    required
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue/20 outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Phone Number</label>
+                  <input
+                    required
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue/20 outline-none"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Email Address</label>
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue/20 outline-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Years of Experience</label>
+                <select
+                  required
+                  name="experience"
+                  value={formData.experience}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-blue/20 outline-none"
+                >
+                  <option value="">Select range</option>
+                  <option value="Less than 1 year">Less than 1 year</option>
+                  <option value="1–3 years">1–3 years</option>
+                  <option value="3–5 years">3–5 years</option>
+                  <option value="5+ years">5+ years</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Resume <span className="text-brand-red">*</span>
+                </label>
+                <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-brand-blue/40 transition-colors relative">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={e => setResume(e.target.files?.[0] ?? null)}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  {resume ? (
+                    <div className="flex items-center justify-center gap-2 text-sm text-brand-blue font-medium">
+                      <FileUp className="w-5 h-5" />
+                      {resume.name}
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-10 h-10 text-slate-300 mx-auto mb-4" />
+                      <p className="text-sm text-slate-600 font-medium">Click to upload your resume</p>
+                      <p className="text-xs text-slate-400 mt-1">PDF, DOC or DOCX</p>
+                    </>
+                  )}
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-brand-red text-white py-4 rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : 'Submit Application'}
+              </button>
+            </form>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="space-y-8"
+            >
+              <div className="bg-green-50 border border-green-100 p-6 rounded-2xl flex items-center gap-4 text-green-800">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="text-white w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold">Application Received</h4>
+                  <p className="text-sm opacity-80 text-green-700">We'll review your resume and be in touch shortly.</p>
+                </div>
+              </div>
+              <button
                 onClick={onClose}
                 className="w-full bg-brand-blue text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all"
               >
@@ -949,6 +1165,8 @@ export default function App() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [isPrivacyPolicyModalOpen, setIsPrivacyPolicyModalOpen] = useState(false);
   const [isTermsOfServiceModalOpen, setIsTermsOfServiceModalOpen] = useState(false);
+  const [isDispatcherModalOpen, setIsDispatcherModalOpen] = useState(false);
+  const [isCallUsModalOpen, setIsCallUsModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-white selection:bg-brand-red/20 selection:text-brand-red">
@@ -957,14 +1175,19 @@ export default function App() {
         <Hero onOpenQuote={() => setIsQuoteModalOpen(true)} />
         <Services />
         <About />
-        <Careers />
+        <Careers
+          onApplyDispatcher={() => setIsDispatcherModalOpen(true)}
+          onApplyDriver={() => setIsCallUsModalOpen(true)}
+        />
         <Contact />
       </main>
-      <Footer 
-        onOpenPrivacyPolicy={() => setIsPrivacyPolicyModalOpen(true)} 
+      <Footer
+        onOpenPrivacyPolicy={() => setIsPrivacyPolicyModalOpen(true)}
         onOpenTermsOfService={() => setIsTermsOfServiceModalOpen(true)}
       />
       <QuoteModal isOpen={isQuoteModalOpen} onClose={() => setIsQuoteModalOpen(false)} />
+      <CallUsModal isOpen={isCallUsModalOpen} onClose={() => setIsCallUsModalOpen(false)} />
+      <DispatcherApplyModal isOpen={isDispatcherModalOpen} onClose={() => setIsDispatcherModalOpen(false)} />
       <PrivacyPolicyModal isOpen={isPrivacyPolicyModalOpen} onClose={() => setIsPrivacyPolicyModalOpen(false)} />
       <TermsOfServiceModal isOpen={isTermsOfServiceModalOpen} onClose={() => setIsTermsOfServiceModalOpen(false)} />
     </div>
